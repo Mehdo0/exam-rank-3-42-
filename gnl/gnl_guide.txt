@@ -1,0 +1,32 @@
+
+// join and free
+
+
+
+// delete line find
+	// find len of first line
+	// if eol == \0 return NULL
+	// len of file - len of firstline + 1
+	// line == buffer
+
+
+
+// take line for return
+	// if no line return NULL
+	// go to the eol
+	// malloc to eol
+	// line = buffer
+	// if eol is \0 or \n, replace eol by \n
+
+
+
+	// malloc if res dont exist
+	// malloc buffer
+		// while not eof read
+		// 0 to end for leak
+		// join and free
+		// quit if \n find
+
+
+
+	// error handling
