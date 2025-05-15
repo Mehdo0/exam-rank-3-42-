@@ -6,7 +6,7 @@
 /*   By: mmouaffa <mmouaffa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/06 12:26:57 by mmouaffa          #+#    #+#             */
-/*   Updated: 2025/05/06 12:42:22 by mmouaffa         ###   ########.fr       */
+/*   Updated: 2025/05/08 17:04:08 by mmouaffa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,30 +27,30 @@ char    *swap(char  *str, int i , int j)
 void    try_all_comb(char *str, int size, int l)
 {
     int i;
+    
     if (l == size - 1)
     {
         write(1, str, size);
-        write(1, "\n", 1);
-        return;
+        write (1, '\n', 1);
+        return ;
     }
-    for(i = l; i < size; i++)
+    for (i = l; i < size; i++)
     {
         swap(str, l, i);
-        try_all_comb(str, size, l + 1);
+        try_all_comb(str, size, l);
         swap(str, l, i);
     }
 }
 
 void    bubble_sort(char *str, int size)
 {
-    int i;
-    int j;
+    int i, j;
     
     i = 0;
     while (i < size)
     {
         j = 0;
-        while (j < size - i - 1)
+        while (j < size)
         {
             if (str[j] > str[j + 1])
                 swap(str, j, j + 1);

@@ -6,101 +6,145 @@
 /*   By: mmouaffa <mmouaffa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/07 16:21:29 by mmouaffa          #+#    #+#             */
-/*   Updated: 2025/04/15 17:22:02 by mmouaffa         ###   ########.fr       */
+/*   Updated: 2025/05/15 14:51:39 by mmouaffa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "gnl.h"
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
 
-char	*ft_free(char *res, char *buffer)
+#ifndef BUFFER_SIZE
+#define BUFFER_SIZE 1
+#endif
+
+int	ft_strlen(char *str)
 {
-	char	*temp;
+	int i;
 
-	temp = ft_strjoin(res, buffer);
-	free(res);
-	return (temp);
+	i = 0;
+	if (!str)
+		return (0);
+	while (str[i])
+		i++;
+	return (i);
+}
+
+char	*ft_strjoin(char *s1, char *s2)
+{
+	int i = 0;
+	int j = 0;
+	int total_size = ft_strlen(s1) + ft_strlen(s2);
+	char	*res = malloc(sizeof(char) * total_size + 1);
+
+	if (!res || !s1 || !s2)
+		return (NULL);
+	while (s1[i])
+	{
+		res[i] = s1[i];
+		i++;
+	}
+	while (s2[j])
+	{
+		res[i + j] = s2[j];
+		j++;
+	}
+	res[total_size] = 0;
+	return (res);
 }
 
 char	*ft_next(char *buffer)
 {
-	int	i = 0;
-	int	j = 0;
-	char	*line;
-	
-	while (buffer[i] && buffer[i] != '\n')
-		i++;
-	if (!buffer[i])
-	{
-		free(buffer);
-		return(NULL);
-	}
-	line = ft_calloc((ft_strlen(buffer) - i + 1), sizeof(char));
-	i++;
-	j = 0;
-	while (buffer[i])
-		line[j++] = buffer[i++];
-	free(buffer);
-	return (line);
-}
-
-char	*ft_line(char *buffer)
-{
-	char	*line;
+	char	*res;
 	int		i = 0;
 	
 	if (!buffer)
 		return (NULL);
 	while (buffer[i] && buffer[i] != '\n')
 		i++;
-	line = ft_calloc(i + 2, sizeof(char));
-	i = 0;
+	if (!buffer[i])
+	{
+		free(buffer);
+		return (NULL);
+	}
+	res = malloc(sizeof(char) * (ft_strlen(buffer) - i + 1));
+	i++;
+	int j = 0;
 	while (buffer[i])
 	{
-		line[i] = buffer[i];
+		res[j] = buffer[i];
 		i++;
-	}
-	if (buffer[i] && buffer[i] == '\n')
-		line[i++] = '\n';
-	return (line);
-}
-
-char	*read_file(int fd, char *res)
-{
-	char	*buffer;
-	int		bytes_read = 1;
-	
-	if (!res)
-		res = ft_calloc(1, 1);
-	buffer = ft_calloc(BUFFER_SIZE + 1, sizeof(char));
-	if (!buffer)
-		return (NULL);
-	while (bytes_read > 0)
-	{
-		bytes_read = read(fd, buffer, BUFFER_SIZE);
-		if (!bytes_read)
-		{
-			free(buffer);
-			return (NULL);
-		}
-		buffer[bytes_read] = 0;
-		res = ft_free(res , buffer);
-		if (ft_strchr(res, '\n'))
-			break;
+		j++;
 	}
 	free(buffer);
 	return (res);
 }
 
-char	*get_next_line(int fd)
+char	*ft_line(char *buffer)
 {
-	const char		*buffer;
-	char			*line;
+	int	i = 0;
+	char	*line;
 	
-	if (fd < 0 || BUFFER_SIZE <= 0 || !buffer)
-		return (NULL);
-	buffer = read_file(fd, buffer);
 	if (!buffer)
 		return (NULL);
+	while (buffer[i] && buffer[i] != '\n')
+		i++;
+	line = malloc(sizeof(char) * (i + 2));
+	i = 0;
+	while (buffer[i] && buffer[i] != '\n')
+	{
+		line[i] = buffer[i];
+		i++;
+	}
+	if (buffer[i] == '\n' && buffer[i])
+		line[i++] = '\n';
+	return (line);
+}
+
+char	*ft_read(char *res, int fd)
+{
+	int	bytes_read = 1;
+	char	*buffer;
+	if (!res)
+		res = malloc(sizeof(char));
+	
+	while (bytes_read)
+	{
+		buffer = malloc(sizeof(char) * BUFFER_SIZE + 1);
+		if(!buffer)
+		{
+			free(res);
+			return (NULL);
+		}
+		bytes_read = read(fd, buffer, BUFFER_SIZE);
+		if (bytes_read <= 0)
+		{
+			free(buffer);
+			free(res);
+			return (NULL);
+		}
+		buffer[bytes_read] = 0;
+		char	*tmp = ft_strjoin(res, buffer);
+		if (!tmp)
+		{
+			free(buffer);
+			free(res);
+			return (NULL);
+		}
+		res = tmp;
+		free(buffer);
+	}
+	return (res);
+}
+
+char	*get_next_line(int fd)
+{
+	const char	*buffer;
+	char		*line;
+	
+	if (fd < 0 || read(fd, buffer, BUFFER_SIZE) < 0 || BUFFER_SIZE <= 0)
+		return (NULL);
+	buffer = ft_read(buffer, fd);
 	line = ft_line(buffer);
 	buffer = ft_next(buffer);
 	return (line);

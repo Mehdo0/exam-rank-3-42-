@@ -6,110 +6,119 @@
 /*   By: mmouaffa <mmouaffa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 15:45:37 by mmouaffa          #+#    #+#             */
-/*   Updated: 2025/05/08 14:12:59 by mmouaffa         ###   ########.fr       */
+/*   Updated: 2025/05/15 15:06:56 by mmouaffa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef BUFFER_SIZE
-# define BUFFER_SIZE 1
-#endif
-
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 
-char    *filter(char *str, char *c)
+#ifndef BUFFER_SIZE
+#define BUFFER_SIZE 11
+#endif
+
+int ft_strlen(char *str)
 {
-    int i = 0;
-    int j;
-    
-    while (str[i])
-    {
-        j = 0;
-        while (str[i + j] == c[j] && str[i + j] && c[j])
-        {
-            j++;
-        }
-        if (j == (int)strlen(c))
-        {
-            int temp = i;
-            while (i - j + 1 <= temp)
-            {
-                str[i] = '*';
-                i++;
-            }
-        }
-        i++;        
-    }
-    return (str);
+	int i;
+
+	i = 0;
+	while (str[i])
+		i++;
+	return(i);
 }
 
-char    *ft_strjoin(char *s1, char *s2)
+char	*filter(char *input, char *c)
 {
-    char    *res;
-    int i = 0;
-    size_t total_size = strlen(s1) + strlen(s2);
-
-    res = malloc(sizeof(char) * total_size + 1);
-    if (!res || !s1 || !s2)
-        return (NULL);
-    while (s1[i])
-    {
-        res[i] = s1[i];
-        i++;
-    }
-    int j = 0;
-    while (s2[j])
-    {
-        res[i] = s2[j];
-        i++;
-        j++;
-    }
-    res[total_size] = 0;
-    return (res);
+	int	i = 0;
+	int	j = 0;
+	int str_size = ft_strlen(input);
+	int c_size = ft_strlen(c);
+	
+	while (i < str_size)
+	{
+		j = 0;
+		while (j < c_size && input[i + j] && input[i + j] == c[j])
+			j++;
+		if (j == c_size)
+		{
+			j = 0;
+			while (input[i + j] && j < c_size)
+			{
+				input[i + j] = '*';
+				j++;
+			}
+		}
+		i++;
+	}
+	return (input);
 }
 
-int main(int ac, char **av)
+char	*ft_strjoin(char *s1, char *s2)
 {
-    char    *buff;
-    char    *res;
-    int     bytes_read = 1;
-    res = malloc(1);
-    if (ac != 2)
-        return (1);
-    while (bytes_read)
-    {
-        buff = malloc(sizeof(char) * BUFFER_SIZE);
-        if (!buff)
-        {
-            free(res);
-            return (1);   
-        }
-        bytes_read = read(0, buff, BUFFER_SIZE);
-        if (!bytes_read)
-        {
-            free(buff);
-            return (1);
-        }
-        buff[bytes_read] = '\0';
-        if (buff[0] == '\n')
-        {
-            free(buff);
-            break ;
-        }
-        char    *tmp = ft_strjoin(res, buff);
-        if (!tmp)
-        {
-            free(res);
-            free(buff);
-            return (1);
-        }
-        free(res);
-        res = tmp;
-        free(buff);
-    }
-    filter(res, av[1]);
-    printf("%s\n", res);
-    return (0);
+	int i = 0;
+	int j = 0;
+	char	*res;
+	int total_size = ft_strlen(s1) + ft_strlen(s2);
+	
+	res = malloc(sizeof(char) * total_size + 1);
+	if (!res || !s1 || !s2)
+		return (NULL);
+	while (s1[i])
+	{
+		res[i] = s1[i];
+		i++;
+	}
+	while (s2[j])
+	{
+		res[i + j] = s2[j];
+		j++;
+	}
+	if (i + j != total_size)
+		printf("error : strjoin\n");
+	else{};
+	res[total_size] = 0;
+	return (res);
+}
+
+int	main(int ac, char **av)
+{
+	int bytes_read = 1;
+	char *buffer;
+	char *res;
+	
+	if (ac != 2 )
+		return (1);
+	res = malloc(sizeof(char) * bytes_read);
+	while (bytes_read)
+	{
+		buffer = malloc (sizeof(char) * BUFFER_SIZE + 1);
+		if (!buffer)
+			return (1);
+		bytes_read = read(0, buffer, BUFFER_SIZE);
+		if (bytes_read == -1)
+		{
+			free(buffer);
+			return (1);
+		}
+		buffer[bytes_read] = 0;
+		if (buffer[BUFFER_SIZE - 1] == '\n')
+		{
+			free(buffer);
+			break;
+		}
+		char *tmp = ft_strjoin(res, buffer);
+		if (!tmp)
+		{
+			free(res);
+			free(buffer);
+			return (1);
+		}
+		res = tmp;
+		free(buffer);
+	}
+	filter(res, av[1]);
+	printf("%s\n", res);
+	free(res);
+	return (0);
 }
