@@ -3,125 +3,182 @@
 /*                                                        :::      ::::::::   */
 /*   gnl.c                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mmouaffa <mmouaffa@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mehdi <mehdi@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/04/03 17:33:33 by mmouaffa          #+#    #+#             */
-/*   Updated: 2025/04/03 17:34:22 by mmouaffa         ###   ########.fr       */
+/*   Created: 2025/04/26 13:03:03 by mehdi             #+#    #+#             */
+/*   Updated: 2025/05/21 22:56:03 by mehdi            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "gnl.h"
+#include <unistd.h>
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/uio.h>
 
-// join and free
-char	*ft_free(char *buffer, char *buf)
+#ifndef BUFFER_SIZE
+#define BUFFER_SIZE 1
+#endif
+
+char	*ft_free(char *res, char *buffer)
 {
-	char	*temp;
-
-	temp = ft_strjoin(buffer, buf);
-	free(buffer);
-	return (temp);
+	char	*tmp;
+	
+	tmp = ft_strjoin(res, buffer);
+	free(res);
+	return (tmp);
 }
 
-// delete line find
-char	*ft_next(char *buffer)
+char	*ft_strchr(char *str, int c)
 {
-	int		i;
-	int		j;
-	char	*line;
+	char	*res;
+
+	res = str;
+	while (*str && *str != c)
+	{
+		str++;
+	}
+	if (*str == c)
+		return (str);
+	return (NULL);
+}
+
+int	ft_strlen(char *str)
+{
+	int	i;
 
 	i = 0;
-	// find len of first line
-	while (buffer[i] && buffer[i] != '\n')
+	while (str[i])
 		i++;
-	// if eol == \0 return NULL
-	if (!buffer[i])
-	{
-		free(buffer);
-		return (NULL);
-	}
-	// len of file - len of firstline + 1
-	line = ft_calloc((ft_strlen(buffer) - i + 1), sizeof(char));
-	i++;
-	j = 0;
-	// line == buffer
-	while (buffer[i])
-		line[j++] = buffer[i++];
-	free(buffer);
-	return (line);
+	return (i);
 }
 
-// take line for return
+char	*ft_calloc(int size, int element)
+{
+	char	*str;
+	int		i;
+
+	str = malloc(size * element);
+	if (!str)
+		return (NULL);
+	i = 0;
+	while (str[i])
+	{
+		str[i] = 0;
+		i++;
+	}
+	return (str);
+}
+
+char	*ft_strjoin(char *s1, char *s2)
+{
+	char	*res;
+	int		total_size;
+
+	total_size = ft_strlen(s1) + ft_strlen(s2);
+	res = ft_calloc(total_size, sizeof(char));
+	if (!res)
+		return(NULL);
+	int	i = 0;
+	while (s1[i])
+	{
+		res[i] = s1[i];
+		i++;
+	}
+	int	j = 0;
+	while (s2[i])
+	{
+		res[i] = s2[j];
+		i++;
+		j++;
+	}
+	res[total_size] = '\0';
+	return (res);
+}
+
 char	*ft_line(char *buffer)
 {
+	int	i;
 	char	*line;
-	int		i;
 
 	i = 0;
-	// if no line return NULL
-	if (!buffer[i])
+	if (!buffer)
 		return (NULL);
-	// go to the eol
 	while (buffer[i] && buffer[i] != '\n')
 		i++;
-	// malloc to eol
 	line = ft_calloc(i + 2, sizeof(char));
 	i = 0;
-	// line = buffer
 	while (buffer[i] && buffer[i] != '\n')
 	{
 		line[i] = buffer[i];
 		i++;
 	}
-	// if eol is \0 or \n, replace eol by \n
-	if (buffer[i] && buffer[i] == '\n')
+	if (buffer[i] == '\n')
 		line[i++] = '\n';
 	return (line);
 }
 
-char	*read_file(int fd, char *res)
+char	*ft_next(char *res)
 {
-	char	*buffer;
-	int		byte_read;
+	int	i;
+	int	j;
+	char	*line;
 
-	// malloc if res dont exist
+	i = 0;
+	while (res[i] && res[i] != '\n')
+		i++;
 	if (!res)
-		res = ft_calloc(1, 1);
-	// malloc buffer
-	buffer = ft_calloc(BUFFER_SIZE + 1, sizeof(char));
-	byte_read = 1;
-	while (byte_read > 0)
 	{
-		// while not eof read
-		byte_read = read(fd, buffer, BUFFER_SIZE);
-		if (byte_read == -1)
+		free(res);
+		return (NULL);
+	}
+	line = ft_calloc((ft_strlen(res) - i + 1), sizeof(char));
+	j = 0;
+	while (res[i])
+	{
+		line[j] = res[i];
+		i++;
+		j++;
+	}
+	fre(res);
+	return (line);
+}
+
+char	*read_file(char *buffer, int fd)
+{
+	int	bytes_read = 1;
+	char	*res;
+	
+	if (!buffer)
+		buffer = ft_calloc(1,1);
+	res = ft_calloc(BUFFER_SIZE + 1, sizeof(char));
+	while (bytes_read > 0)
+	{
+		bytes_read = read(fd, res, BUFFER_SIZE);
+		if (bytes_read == -1)
 		{
 			free(buffer);
 			return (NULL);
 		}
-		// 0 to end for leak
-		buffer[byte_read] = 0;
-		// join and free
-		res = ft_free(res, buffer);
-		// quit if \n find
+		res[bytes_read] = 0;
+		buffer = ft_free(buffer, res);
 		if (ft_strchr(buffer, '\n'))
-			break ;
+			return (buffer);
 	}
-	free(buffer);
-	return (res);
+	free(res);
+	return (buffer);
 }
 
 char	*get_next_line(int fd)
 {
 	static char	*buffer;
 	char		*line;
-
-	// error handling
 	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
 		return (NULL);
-	buffer = read_file(fd, buffer);
+
+	buffer = read_file(buffer, fd);
 	if (!buffer)
 		return (NULL);
 	line = ft_line(buffer);
 	buffer = ft_next(buffer);
-	return (line);
+	return (buffer);
 }

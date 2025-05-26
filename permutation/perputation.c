@@ -6,7 +6,7 @@
 /*   By: mehdi <mehdi@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/06 12:26:57 by mmouaffa          #+#    #+#             */
-/*   Updated: 2025/05/21 22:55:16 by mehdi            ###   ########.fr       */
+/*   Updated: 2025/05/26 16:02:57 by mehdi            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,55 +24,65 @@ char    *swap(char  *str, int i , int j)
     return (str);
 }
 
-void    try_all_comb(char *str, int size, int l)
+int ft_strlen(char *str)
 {
-    int i;
-    
-    if (l == size - 1)
-    {
-        write(1, str, size);
-        write (1, '\n', 1);
-        return ;
-    }
-    for (i = l; i < size; i++)
-    {
-        swap(str, l, i);
-        try_all_comb(str, size, l);
-        swap(str, l, i);
-    }
+    int i = 0;
+    while (str[i])i++;
+    return (i);
 }
 
 void    bubble_sort(char *str, int size)
 {
-    int i, j;
-    
-    i = 0;
-    while (i < size)
+    for (int i = 0; i < size; i++)
     {
-        j = 0;
-        while (j < size)
+        for (int j = 0; j < size - i - 1; j++)
         {
             if (str[j] > str[j + 1])
                 swap(str, j, j + 1);
-            j++;
         }
-        i++;
     }
+}
+
+int next_permutation(char *str, int size)
+{
+    int i = size - 2;
+    while (i >= 0 && str[i] >= str[i + 1])
+        i--;
+    if (i < 0)
+        return (0);
+    int j = size -1;
+    while (str[j] <= str[i])
+        j--;
+    swap(str, i, j);
+    int start = i + 1;
+    int end = size - 1;
+    while (start < end)
+    {
+        swap(str, start, end);
+        start++;
+        end--;
+    }
+    return (1);
 }
 
 int main(int ac, char **av)
 {
-    int	i;
-    
-    i = 0;
     if (ac != 2)
-    {
-        write(1, "Error\n", 6);
         return (1);
+    int len = 0;
+    while (av[1][len])
+        len++;
+    char    *str = malloc(len + 1);
+    if (!str)
+        return (1);
+    for (int i = 0; i < len; i++)
+    {
+        str[i] = av[1][i];
     }
-    while (av[1][i])
-        {i++;}
-	bubble_sort(av[1], i);
-    try_all_comb(av[1], i, 0);
-    return(0);
+    bubble_sort(str, len);
+    do{
+        printf("%s\n", str);
+    }while (next_permutation(str, len));
+    free(len);
+    return (0);
 }

@@ -1,100 +1,84 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   nqueen.c                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: mehdi <mehdi@student.42.fr>                +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/05/26 11:26:45 by mehdi             #+#    #+#             */
+/*   Updated: 2025/05/26 14:25:12 by mehdi            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
-void print_tab(char **tab, int n)
+
+int is_valid(int row, int col, int *positions)
 {
-    for (int i = 0; i < n; i++)
-        printf("%s\n", tab[i]);
+    for (int i = 0; i < row; i++)
+    {
+        if (positions[i] == col || abs(positions[i] - col) == row - i)
+            return 0;
+    }
+    return 1;
 }
 
-void free_tab(char **tab, int n)
+void print_solution(int *positions, int n)
 {
-    for (int i = 0; i < n; i++)
-        free(tab[i]);
-    free(tab);
-}
-
-char **create_tab(int n)
-{
-    char **tab = malloc(sizeof(char *) * n);
-    if (!tab)
-        return (NULL);
+    printf("[");
     for (int i = 0; i < n; i++)
     {
-        tab[i] = malloc(sizeof(char) * (n + 1));
-        if (!tab[i])
-        {
-            for (int j = 0; j < i; j++)
-                free(tab[j]);
-            free(tab);
-            return (NULL);
-        }
-        for (int j = 0; j < n; j++)
-            tab[i][j] = '.';
-        tab[i][n] = '\0';
+        printf("%d", positions[i] + 1);
+        if (i < n - 1)
+            printf(", ");
     }
-    return (tab);
+    printf("]\n");
 }
 
-int is_safe(char **tab, int n, int row, int col)
-{
-    int i, j;
-
-    for (i = 0; i < row; i++)
-    {
-        if (tab[i][col] == 'Q')
-            return (0);
-    }
-    for (i = row - 1, j = col - 1; i >= 0 && j >= 0; i--, j--)
-    {
-        if (tab[i][j] == 'Q')
-            return (0);
-    }
-    for (i = row - 1, j = col + 1; i >= 0 && j < n; i--, j++)
-    {
-        if (tab[i][j] == 'Q')
-            return (0);
-    }
-    return (1);
-}
-
-
-int solveNQueens(char **tab, int n, int row)
+void N_queen(int *positions, int row, int n)
 {
     if (row == n)
-        return (1);
+    {
+        print_solution(positions, n);
+        return;
+    }
 
     for (int col = 0; col < n; col++)
     {
-        if (is_safe(tab, n, row, col))
+        if (is_valid(row, col, positions))
         {
-            tab[row][col] = 'Q';
-            if (solveNQueens(tab, n, row + 1))
-                return (1);
-            tab[row][col] = '.';
+            positions[row] = col;
+            N_queen(positions, row + 1, n);
         }
     }
-    return (0);
 }
 
-int main(int argc, char **argv)
+int main(int ac, char **av)
 {
-    if (argc != 2)
-        return (0);
-
-    int n = atoi(argv[1]);
-    if (n < 1)
-        return (0);
-
-    char **tab = create_tab(n);
-    if (!tab)
+    if (ac != 2)
         return (1);
 
-    if (!solveNQueens(tab, n, 0))
-        printf("Aucune solution trouvée.\n");
-    else
-        print_tab(tab, n);
+    int n = atoi(av[1]);
 
-    free_tab(tab, n);
+    if (n == 1)
+    {
+        printf("[1]\n");
+        return (0);
+    }
+    else if (n == 2 || n == 3)
+    {
+        printf("Error : aucune solution trouvee..\n");
+        return (1);
+    }
+
+    int *positions = malloc(sizeof(int) * n);
+    if (!positions)
+        return (1);
+
+    N_queen(positions, 0, n);
+
+    free(positions);
     return (0);
 }

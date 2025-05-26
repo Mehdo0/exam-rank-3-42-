@@ -3,77 +3,84 @@
 /*                                                        :::      ::::::::   */
 /*   permutation.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mmouaffa <mmouaffa@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mehdi <mehdi@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/17 14:56:02 by mmouaffa          #+#    #+#             */
-/*   Updated: 2025/02/17 14:56:03 by mmouaffa         ###   ########.fr       */
+/*   Updated: 2025/05/26 15:29:49 by mehdi            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <unistd.h>
+#include <stdlib.h>
 
-char	*swap(char *str, int i, int j)
+void afficher_chaine(char *str)
 {
-    char	tmp;
-    
-    tmp = str[i];
+    int len = 0;
+    while (str[len])
+        len++;
+    write(1, str, len);
+    write(1, "\n", 1);
+}
+
+void swap(char *str, int i, int j)
+{
+    char tmp = str[i];
     str[i] = str[j];
     str[j] = tmp;
-    return (str);
 }
 
-void	try_all_comb(int size, char *input, int l)
+void bubble_sort(char *str, int size)
 {
-    int		i;
-    
-    if (l == size - 1)
+    for (int i = 0; i < size - 1; i++)
     {
-        write(1, input, size);
-        write(1, "\n", 1);
-        return;
-    }
-    for (i = l; i < size; i++)
-    {
-        swap(input, l, i);
-        try_all_comb(size, input, l + 1);
-        swap(input, l, i); // Restore the string to its original state
+        for (int j = 0; j < size - i - 1; j++)
+        {
+            if (str[j] > str[j + 1])
+                swap(str, j, j + 1);
+        }
     }
 }
 
-void	bubble_sort(char *str, int size)
-{
-	int	i;
-	int	j;
 
-	i = 0;
-	while (i < size)
-	{
-		j = 0;
-		while (j < size - i - 1)
-		{
-			if (str[j] > str[j + 1])
-				swap(str, j, j + 1);
-			j++;
-		}
-		i++;
-	}
+int permutation_suivante(char *str, int len)
+{
+    int i = len - 2;
+    while (i >= 0 && str[i] >= str[i + 1])
+        i--;
+    if (i < 0)
+        return 0;
+
+    int j = len - 1;
+    while (str[j] <= str[i])
+        j--;
+    swap(str, i, j);
+    int start = i + 1, end = len - 1;
+    while (start < end)
+    {
+        swap(str, start, end);
+        start++;
+        end--;
+    }
+    return 1;
 }
 
-int	main(int ac, char **av)
+int main(int ac, char **av)
 {
-    int	i;
-    
-    i = 0;
     if (ac != 2)
-    {
-        write(1, "Error\n", 6);
-        return (1);
-    }
-    while (av[1][i])
-        {i++;}
-	bubble_sort(av[1], i);
-    try_all_comb(i, av[1], 0);
-    return(0);
+        return 1;
+    int len = 0;
+    while (av[1][len])
+        len++;
+    char *str = malloc(len + 1);
+    if (!str)
+        return 1;
+    for (int i = 0; i <= len; i++)
+        str[i] = av[1][i];
+    bubble_sort(str, len);
+    do {
+        afficher_chaine(str);
+    } while (permutation_suivante(str, len));
+
+    free(str);
+    return 0;
 }
